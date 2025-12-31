@@ -1,0 +1,27 @@
+{
+  "India Code: Bharatiya Nyaya Sanhita, 2023": {
+    "act_name": "Bharatiya Nyaya Sanhita",
+    "year": 2023,
+    "category": "Criminal Law"
+  },
+  "India Code: Bharatiya Sakshya Adhiniyam, 2023": {
+    "act_name": "Bharatiya Sakshya Adhiniyam",
+    "year": 2023,
+    "category": "Evidence Law"
+  },
+  "India Code: Indian Penal Code, 1860": {
+    "act_name": "Indian Penal Code",
+    "year": 1860,
+    "category": "Criminal Law"
+  },
+  "India Code: Maharashtra Opium Smoking Act.": {
+    "act_name": "Maharashtra Opium Smoking Act",
+    "year": 1936,
+    "category": "State Law"
+  },
+  "India Code: Semiconductor Integrated Circuits Layout-Design Act, 2000": {
+    "act_name": "Semiconductor Integrated Circuits Layout-Design Act",
+    "year": 2000,
+    "category": "Intellectual Property Law"
+  }
+}

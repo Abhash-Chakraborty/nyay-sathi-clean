@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.env/
+.conda/
+.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large ML artifacts (optional – keep local)
+*.index
+*.pkl
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
