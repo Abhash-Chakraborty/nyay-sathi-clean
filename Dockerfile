@@ -26,12 +26,13 @@ ENV UV_NO_CACHE=1
 # Create venv and install ONLY production dependencies
 # Using CPU-only torch to save ~2GB
 RUN uv venv /build/.venv && \
+    . /build/.venv/bin/activate && \
     uv pip install --python=/build/.venv/bin/python \
     --index-url https://download.pytorch.org/whl/cpu \
     torch && \
     uv pip install --python=/build/.venv/bin/python \
     fastapi==0.115.* \
-    uvicorn[standard]==0.32.* \
+    "uvicorn[standard]==0.32.*" \
     pydantic==2.* \
     httpx==0.28.* \
     sentence-transformers==3.* \
@@ -87,5 +88,5 @@ EXPOSE 7860
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
     CMD curl -f http://localhost:7860/health || exit 1
 
-# Start with optimized settings
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "1"]
+# Start with optimized settings (use python -m for better compatibility)
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860", "--workers", "1"]
