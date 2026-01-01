@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY backend/ .
 
 # Copy data folder (Assumes build context is root)
-COPY data/ /app/data/
+# COPY data/ /app/data/
 
 # Expose port
 EXPOSE 10000
