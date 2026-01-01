@@ -7,20 +7,21 @@ from rag_engine import initialize_rag, retrieve_sections, explain_with_llm
 
 # ================= SCHEMAS =================
 
-class QueryRequest(BaseModel):
+class AskRequest(BaseModel):
     question: str
 
-class Section(BaseModel):
+class Source(BaseModel):
     act: str
     section: str
     text: str
+    score: float
 
-class QueryResponse(BaseModel):
-    mode: str
-    explanation: str
-    sections: List[Section]
-    confidence: float
-    disclaimer: str = "Nyay Sathi provides legal information for educational purposes only. It does not provide legal advice."
+class AskResponse(BaseModel):
+    mode: str  # "rag" | "fallback"
+    confidence: str  # "high" | "low"
+    answer: str
+    sources: List[Source]
+    disclaimer: str = "Informational only, not legal advice"
 
 # ================= LIFECYCLE =================
 
@@ -41,31 +42,41 @@ app = FastAPI(title="Nyay Sathi API", lifespan=lifespan)
 def health_check():
     return {"status": "ok", "service": "Nyay Sathi Backend"}
 
-@app.post("/query", response_model=QueryResponse)
-def query_legal_db(request: QueryRequest):
+@app.post("/ask", response_model=AskResponse)
+def ask_question(request: AskRequest):
     query = request.question.strip()
     if not query:
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
     # 1. Retrieve
-    # RAG engine handles extraction
     raw_results = retrieve_sections(query)
     
     # 2. Explain
-    mode, explanation, confidence = explain_with_llm(query, raw_results)
+    # mode returned by rag_engine is "grounded" (which we map to "rag") or "fallback"
+    rag_mode, explanation, numeric_confidence = explain_with_llm(query, raw_results)
     
-    # 3. Format Response
-    formatted_sections = []
-    for r in raw_results:
-        formatted_sections.append(Section(
-            act=r.get('act_name', 'Unknown'),
-            section=r.get('section_number', 'Unknown'),
-            text=r.get('text', '')
-        ))
+    # Map internal mode "grounded" -> "rag"
+    api_mode = "rag" if rag_mode == "grounded" else "fallback"
+    
+    # Map numeric confidence to "high" | "low"
+    # Logic: If rag_mode is grounded, it implies high confidence (>= threshold)
+    # If fallback, it implies low confidence.
+    confidence_str = "high" if api_mode == "rag" else "low"
 
-    return QueryResponse(
-        mode=mode,
-        explanation=explanation,
-        sections=formatted_sections,
-        confidence=confidence
+    # 3. Format Response
+    formatted_sources = []
+    if api_mode == "rag":
+        for r in raw_results:
+            formatted_sources.append(Source(
+                act=r.get('act_name', 'Unknown'),
+                section=r.get('section_number', 'Unknown'),
+                text=r.get('text', ''),
+                score=r.get('score', 0.0)
+            ))
+
+    return AskResponse(
+        mode=api_mode,
+        confidence=confidence_str,
+        answer=explanation,
+        sources=formatted_sources
     )
